@@ -4,6 +4,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var debug = require('debug')('webhook-server:server');
+const request = require('request');
 
 var app = express();
 var port = normalizePort(process.env.PORT || '3000');
@@ -45,10 +46,28 @@ app.use('/webhook', function(req, res) {
   io.sockets.emit('webhookEvent:' + req.path.replace('/', ''), payload);
   io.sockets.emit('webhookEvent:all', payload);
 
+  console.log("req**************", req);
+
   // handle the challenge
   return res.send(req.query.challenge);
 
 });
+
+function sendToTeams() {
+  var options = {
+    'method': 'POST',
+    'url': 'https://anfcorp.webhook.office.com/webhookb2/c50000e3-92b5-431a-ac3e-7716afbbbf2b@b6c49906-1735-468c-a4a8-7cc863cf5f66/IncomingWebhook/6ffe2cc52c5f418789e61f454c27ac07/11aaacf6-abe3-469d-ab4a-28e6c9fbd329',
+    'headers': {
+      'Content-Type': 'application/json'
+    }
+  };
+  options.body = {text : 'Hello World'};
+
+  request(options, function (error, response) {
+    if (error) throw new Error(error);
+    console.log(response.body);
+  });
+}
 
 io.on('connection', function (socket) {
   socket.emit('welcome', {});  
